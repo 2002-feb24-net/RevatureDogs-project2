@@ -2,3 +2,4 @@ bin/
 obj/
 .vs/
 PublishProfile/
+node_modules/
