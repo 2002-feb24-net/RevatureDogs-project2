@@ -9,9 +9,16 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-
-
 steps:
+
+- task: SonarCloudPrepare@1
+  inputs:
+    SonarCloud: 'RevatureDogs-project2'
+    organization: '2002-feb24-net'
+    scannerMode: 'MSBuild'
+    projectKey: '2002-feb24-net_RevatureDogs-project2'
+    projectName: 'RevatureDogs-project2'
+
 - script: dotnet build
   displayName: 'dotnet build'
 
