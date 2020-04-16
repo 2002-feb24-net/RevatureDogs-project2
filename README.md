@@ -1,2 +1,2 @@
 # RevatureDogs-project2
-Angelica Velez, Russell David Gehan, Tod Jones, Abraham Bergerson
+Angelica Velez, Russell David Gehan, Abraham Bergerson
