@@ -26,3 +26,17 @@ steps:
   inputs:
     command: 'publish'
     publishWebProjects: true
+
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Azure-RevatureDogs-project2'
+    appType: 'webApp'
+    WebAppName: 'RevatureDogs-project2'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+
+- task: SonarCloudAnalyze@1
+
+- task: SonarCloudPublish@1
+  inputs:
+    pollingTimeoutSec: '300'
