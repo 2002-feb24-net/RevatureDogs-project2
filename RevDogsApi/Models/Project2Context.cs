@@ -20,15 +20,6 @@ namespace RevDogsApi.Models
         public virtual DbSet<Tricks> Tricks { get; set; }
         public virtual DbSet<TricksProgress> TricksProgress { get; set; }
         public virtual DbSet<Users> Users { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer(SecretConfiguration.connetionString);
-            }
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DogTypes>(entity =>
