@@ -15,7 +15,7 @@ namespace RevDogsApi.Models
         public int? UserId { get; set; }
         public string PetName { get; set; }
         public int? Hunger { get; set; }
-        public string Mood { get; set; }
+        public int? Mood { get; set; }
         public bool? IsAlive { get; set; }
         public DateTime? AdoptionDate { get; set; }
         public int? Age { get; set; }

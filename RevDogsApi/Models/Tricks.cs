@@ -12,7 +12,7 @@ namespace RevDogsApi.Models
 
         public int Id { get; set; }
         public string TrickName { get; set; }
-        public string TrickBenefit { get; set; }
+        public int TrickBenefit { get; set; }
         public int Diffculty { get; set; }
         public int Points { get; set; }
 
