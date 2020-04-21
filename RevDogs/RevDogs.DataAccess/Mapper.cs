@@ -21,8 +21,9 @@ namespace RevDogs.DataAccess
                 AdoptionDate = dogs.AdoptionDate,
                 Age = dogs.Age,
                 Energy = dogs.Energy,
-                TricksProgress = dogs.TricksProgress.Select(MapTricksProgress).ToList()
-
+                TricksProgress = dogs.TricksProgress.Select(MapTricksProgress).ToList(),
+                DogType = MapDogTypes(dogs.DogType),
+                User = MapUsers(dogs.User)
             };
         }
 
@@ -34,8 +35,7 @@ namespace RevDogs.DataAccess
                 Breed = dogTypes.Breed,
                 LifeExpectancy = dogTypes.LifeExpectancy,
                 Size = dogTypes.Size,
-                Dogs = dogTypes.Dogs.Select(MapDogs).ToList()
-
+                Dogs = dogTypes.Dogs.Select(MapDogs).ToList(),
             };
         }
 
@@ -48,7 +48,7 @@ namespace RevDogs.DataAccess
                 TrickBenefit = tricks.TrickBenefit,
                 Diffculty = tricks.Diffculty,
                 Points = tricks.Points,
-                TricksProgress = tricks.TricksProgress.Select(MapTricksProgress).ToList()
+                TricksProgress = tricks.TricksProgress.Select(MapTricksProgress).ToList(),
             };
         }
 
@@ -59,7 +59,9 @@ namespace RevDogs.DataAccess
                 Id = tricksProgress.Id,
                 PetId = tricksProgress.PetId,
                 TrickId = tricksProgress.TrickId,
-                Progress = tricksProgress.Progress
+                Progress = tricksProgress.Progress,
+                Pet = MapDogs(tricksProgress.Pet),
+                Trick = MapTricks(tricksProgress.Trick),
             };
         }
 
@@ -72,8 +74,7 @@ namespace RevDogs.DataAccess
                 FirstName = users.FirstName,
                 LastName = users.LastName,
                 Score = users.Score,
-                Dogs = users.Dogs.Select(MapDogs).ToList()
-
+                Dogs = users.Dogs.Select(MapDogs).ToList(),
             };
         }
 
@@ -91,8 +92,9 @@ namespace RevDogs.DataAccess
                 AdoptionDate = dogs.AdoptionDate,
                 Age = dogs.Age,
                 Energy = dogs.Energy,
-                TricksProgress = dogs.TricksProgress.Select(MapTricksProgress).ToList()
-
+                TricksProgress = dogs.TricksProgress.Select(MapTricksProgress).ToList(),
+                DogType = MapDogTypes(dogs.DogType),
+                User = MapUsers(dogs.User)
             };
         }
 
@@ -104,8 +106,7 @@ namespace RevDogs.DataAccess
                 Breed = dogTypes.Breed,
                 LifeExpectancy = dogTypes.LifeExpectancy,
                 Size = dogTypes.Size,
-                Dogs = dogTypes.Dogs.Select(MapDogs).ToList()
-
+                Dogs = dogTypes.Dogs.Select(MapDogs).ToList(),
             };
         }
 
@@ -118,7 +119,7 @@ namespace RevDogs.DataAccess
                 TrickBenefit = tricks.TrickBenefit,
                 Diffculty = tricks.Diffculty,
                 Points = tricks.Points,
-                TricksProgress = tricks.TricksProgress.Select(MapTricksProgress).ToList()
+                TricksProgress = tricks.TricksProgress.Select(MapTricksProgress).ToList(),
             };
         }
 
@@ -129,7 +130,9 @@ namespace RevDogs.DataAccess
                 Id = tricksProgress.Id,
                 PetId = tricksProgress.PetId,
                 TrickId = tricksProgress.TrickId,
-                Progress = tricksProgress.Progress
+                Progress = tricksProgress.Progress,
+                Pet = MapDogs(tricksProgress.Pet),
+                Trick = MapTricks(tricksProgress.Trick)
             };
         }
 
@@ -142,10 +145,8 @@ namespace RevDogs.DataAccess
                 FirstName = users.FirstName,
                 LastName = users.LastName,
                 Score = users.Score,
-                Dogs = users.Dogs.Select(MapDogs).ToList()
-
+                Dogs = users.Dogs.Select(MapDogs).ToList(),
             };
         }
-
     }
 }

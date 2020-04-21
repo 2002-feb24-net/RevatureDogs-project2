@@ -16,9 +16,8 @@ namespace RevDogs.Core.Model
         public DateTime? AdoptionDate { get; set; }
         public int? Age { get; set; }
         public int? Energy { get; set; }
-
-        // public virtual DogTypes DogType { get; set; }
-        // public virtual Users User { get; set; }
+        public DogTypes DogType { get; set; }
+        public Users User { get; set; }
         public List<TricksProgress> TricksProgress { get; set; } = new List<TricksProgress>();
     }
 }
