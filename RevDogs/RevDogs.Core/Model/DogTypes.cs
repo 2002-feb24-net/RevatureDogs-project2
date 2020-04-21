@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RevDogs.Core
+namespace RevDogs.Core.Model
 {
     public class DogTypes
     {
