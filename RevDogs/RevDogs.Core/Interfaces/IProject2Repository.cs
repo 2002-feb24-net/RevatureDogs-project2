@@ -29,5 +29,9 @@ namespace RevDogs.Core.Interfaces
         Task<TricksProgress> PutTricksProgress(TricksProgress tricksProgress);
 
         Task<TricksProgress> PostTricksProgress(TricksProgress tricksProgress);
+
+        Task<IEnumerable<DogTypes>> GetDogTypes();
+
+        Task<IEnumerable<Tricks>> GetTricks();
     }
 }
