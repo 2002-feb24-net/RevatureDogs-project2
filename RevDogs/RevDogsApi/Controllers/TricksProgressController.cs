@@ -85,21 +85,21 @@ namespace RevDogsApi.Controllers
             return CreatedAtAction("GetTricksProgress", new { id = tricksProgress.Id }, tricksProgress);
         }
 
-        // DELETE: api/TricksProgress/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<TricksProgress>> DeleteTricksProgress(int id)
-        {
-            var tricksProgress = await _context.TricksProgress.FindAsync(id);
-            if (tricksProgress == null)
-            {
-                return NotFound();
-            }
+        // // DELETE: api/TricksProgress/5
+        // [HttpDelete("{id}")]
+        // public async Task<ActionResult<TricksProgress>> DeleteTricksProgress(int id)
+        // {
+        //     var tricksProgress = await _context.TricksProgress.FindAsync(id);
+        //     if (tricksProgress == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            _context.TricksProgress.Remove(tricksProgress);
-            await _context.SaveChangesAsync();
+        //     _context.TricksProgress.Remove(tricksProgress);
+        //     await _context.SaveChangesAsync();
 
-            return tricksProgress;
-        }
+        //     return tricksProgress;
+        // }
 
         private bool TricksProgressExists(int id)
         {
