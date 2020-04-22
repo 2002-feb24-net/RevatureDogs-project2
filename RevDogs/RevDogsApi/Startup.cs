@@ -12,6 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RevDogsApi.Models;
+using Microsoft.OpenApi.Models;
+
 
 namespace RevDogsApi
 {
@@ -30,6 +32,16 @@ namespace RevDogsApi
             services.AddControllers();
 
             services.AddDbContext<Project2Context>(options => options.UseSqlServer(SecretConfiguration.connectionString));
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowLocalAndAppServiceAngular", builder =>
+                builder.WithOrigins("https://revdogsangularstatic.z22.web.core.windows.net/" ,"http://localhost:4200")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                );
+
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,6 +55,8 @@ namespace RevDogsApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors("AllowLocalAndAppServiceAngular");
 
             app.UseAuthorization();
 
