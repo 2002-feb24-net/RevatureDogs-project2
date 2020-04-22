@@ -6,7 +6,7 @@ using System.Text;
 
 namespace RevDogs.DataAccess.Repository
 {
-    public class Project2Repository : IProject2Repository
+    public class Project2Repository //: IProject2Repository
     {
         private readonly RevatureDogsP2Context _dbContext;
 
