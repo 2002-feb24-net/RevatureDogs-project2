@@ -41,6 +41,20 @@ namespace RevDogsApi.Controllers
             return users;
         }
 
+        // GET: api/Users/Login
+        [HttpGet("login/{username}")]
+        public async Task<ActionResult<Users>> GetUsersLogin(string username)
+        {
+            var users = await _context.Users.FirstOrDefaultAsync(user => user.UserName == username);
+
+            if (users == null)
+            {
+                return NotFound();
+            }
+
+            return users;
+        }
+
         // PUT: api/Users/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
