@@ -8,30 +8,30 @@ namespace RevDogs.Core.Interfaces
 {
     public interface IProject2Repository
     {
-        Task<Users> GetUsers(int id);
-        Task<Users> PutUsers(Users users);
-        Task<Users> PostUsers(Users users);
-        Task<Users> DeleteUsers(int id);
+        Task<Users> GetUsersAsync(int id);
+        Task<Users> PutUsersAsync(Users users);
+        Task<Users> PostUsersAsync(Users users);
+        Task<bool> RemoveUsersAsync(int id);
 
         // gets all dogs
-        Task<IEnumerable<Dogs>> GetDogs();
+        Task<IEnumerable<Dogs>> GetDogsAsync();
         // gets dog by id
-        Task<Dogs> GetDogs(int id);
+        Task<Dogs> GetDogsAsync(int id);
         // gets dog by User id
-        Task<IEnumerable<Dogs>> GetUserDogs(int Userid);
-        Task<Dogs> PutDogs(Dogs dogs);
-        Task<Dogs> PostDogs(Dogs dogs);
-        Task<Dogs> DeleteDogs(int id);
+        Task<IEnumerable<Dogs>> GetUserDogsAsync(int Userid);
+        Task<Dogs> PutDogsAsync(Dogs dogs);
+        Task<Dogs> PostDogsAsync(Dogs dogs);
+        Task<bool> RemoveDogsAsync(int id);
 
         // gets trick progress based off pet ID
-        Task<IEnumerable<TricksProgress>> GetTricksProgress(int id);
+        Task<IEnumerable<TricksProgress>> GetTricksProgressAsync(int id);
 
-        Task<TricksProgress> PutTricksProgress(TricksProgress tricksProgress);
+        Task<TricksProgress> PutTricksProgressAsync(TricksProgress tricksProgress);
 
-        Task<TricksProgress> PostTricksProgress(TricksProgress tricksProgress);
+        Task<TricksProgress> PostTricksProgressAsync(TricksProgress tricksProgress);
 
-        Task<IEnumerable<DogTypes>> GetDogTypes();
+        Task<IEnumerable<DogTypes>> GetDogTypesAsync();
 
-        Task<IEnumerable<Tricks>> GetTricks();
+        Task<IEnumerable<Tricks>> GetTricksAsync();
     }
 }
