@@ -13,6 +13,7 @@ namespace RevDogsApi.Controllers
     [ApiController]
     public class DogsController : ControllerBase
     {
+        // Testing
         private readonly Project2Context _context;
 
         public DogsController(Project2Context context)
