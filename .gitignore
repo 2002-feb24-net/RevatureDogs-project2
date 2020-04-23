@@ -4,4 +4,4 @@ obj/
 .vscode/
 PublishProfile/
 node_modules/
-SecretConfiguration.cs
+# SecretConfiguration.cs
