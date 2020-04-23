@@ -41,6 +41,25 @@ namespace RevDogsApi.Controllers
             return tricksProgress;
         }
 
+        // GET: api/TricksProgress/FromDog/5
+        [HttpGet("FromDog/{DogId}")]
+        public async Task<ActionResult<IEnumerable<TricksProgress>>> GetDogsFromUser(int DogId)
+        {
+            var tricks = await _context.TricksProgress.ToListAsync();
+            var dogsTricks = new List<TricksProgress>();
+
+            foreach(var trick in tricks)
+            {
+                if(trick.PetId == DogId)
+                {
+                    dogsTricks.Add(trick);
+                }
+            }
+
+            return dogsTricks;
+        }
+
+
         // PUT: api/TricksProgress/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
