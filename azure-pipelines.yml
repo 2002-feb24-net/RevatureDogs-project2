@@ -23,7 +23,7 @@ stages:
      vmImage: 'ubuntu-latest'
 
 
-     steps:
+    steps:
 
      - task: UseDotNet@2
        inputs:
