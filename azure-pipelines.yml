@@ -75,4 +75,3 @@ stages:
               appType: 'webApp'
               WebAppName: 'RevatureDogs-project2'
               packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
-            displayName: azure app service deploy  
