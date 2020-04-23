@@ -42,6 +42,24 @@ namespace RevDogsApi.Controllers
             return dogs;
         }
 
+        // GET: api/Dogs/FromUser/5
+        [HttpGet("FromUser/{UserId}")]
+        public async Task<ActionResult<IEnumerable<Dogs>>> GetDogsFromUser(int UserId)
+        {
+            var dogs = await _context.Dogs.ToListAsync();
+            var dogsFromUser = new List<Dogs>();
+
+            foreach(var dog in dogs)
+            {
+                if(dog.UserId == UserId)
+                {
+                    dogsFromUser.Add(dog);
+                }
+            }
+
+            return dogsFromUser;
+        }
+
         // PUT: api/Dogs/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
