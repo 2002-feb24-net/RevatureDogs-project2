@@ -29,7 +29,7 @@ stages:
        inputs:
          packageType: sdk
          version: $(sdkVersion)
-         displayName: dotnet $(sdkVersion)
+       displayName: dotnet $(sdkVersion)
 
      - task: DotNetCoreCLI@2
        inputs:
@@ -45,6 +45,69 @@ stages:
      - publish: $(Build.ArtifactStagingDirectory)/app
        artifact: app
        displayName: artifact publish app
+
+
+  - job: test
+
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+
+    - task: UseDotNet@2
+      inputs:
+        packageType: sdk
+        version: 2.1.x
+      displayName: dotnet 2.1.x
+    
+    - task: SonarCloudPrepare@1
+      inputs:
+        SonarCloud: 'RevatureDogs-project2'
+        organization: '2002-feb24-net'
+        scannerMode: 'MSBuild'
+        projectKey: 'revaturedogsproject2'
+    - task: UseDotNet@2
+      inputs:
+        packageType: sdk
+        version: $(sdkVersion)
+      displayName: dotnet $(sdkVersion)
+
+    - script: dotnet build
+        --configuration $(buildConfiguration)
+      workingDirectory: $(solutionPath)
+      displayName: dotnet build
+
+    - script: dotnet test
+        --configuration $(buildConfiguration)
+        --logger trx
+        --no-build
+        --results-directory $(Common.TestResultsDirectory)
+        --settings coverlet.runsettings
+      workingDirectory: $(solutionPath)
+      continueOnError: true
+      displayName: dotnet test
+
+    - task: SonarCloudAnalyze@1
+      displayName: sonarcloud analysis run
+
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testRunner: VSTest
+        testResultsFiles: $(Common.TestResultsDirectory)/*.trx
+      displayName: test results build publish
+
+    - task: PublishCodeCoverageResults@1
+      condition: succeededOrFailed()
+      inputs:
+        codeCoverageTool: Cobertura
+        summaryFileLocation: $(Common.TestResultsDirectory)/*/coverage.cobertura.xml
+      displayName: code coverage build publish
+
+    - task: SonarCloudPublish@1
+      condition: succeededOrFailed()
+      displayName: sonarcloud results build publish
+
 
 - stage: deploy
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
