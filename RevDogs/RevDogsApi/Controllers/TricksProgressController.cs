@@ -1,11 +1,12 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using RevDogs.Core.Interfaces;
+using RevDogs.Core.Model;
+using RevDogs.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RevDogsApi.Models;
 
 namespace RevDogsApi.Controllers
 {
@@ -13,38 +14,35 @@ namespace RevDogsApi.Controllers
     [ApiController]
     public class TricksProgressController : ControllerBase
     {
-        private readonly Project2Context _context;
+        private readonly IProject2Repository _userRepo;
 
-        public TricksProgressController(Project2Context context)
+        public TricksProgressController(IProject2Repository userRepo)
         {
-            _context = context;
+            _userRepo = userRepo;
         }
 
-        // GET: api/TricksProgress
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TricksProgress>>> GetTricksProgress()
-        {
-            return await _context.TricksProgress.ToListAsync();
-        }
-
-        // GET: api/TricksProgress/5
+        // GET: api/TricksProgress/1
         [HttpGet("{id}")]
-        public async Task<ActionResult<TricksProgress>> GetTricksProgress(int id)
+        [ProducesResponseType(typeof(TricksProgress), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTricksProgress(int id)
         {
-            var tricksProgress = await _context.TricksProgress.FindAsync(id);
+            var tricksProgresses = await _userRepo.GetTricksProgressAsync(id);
 
-            if (tricksProgress == null)
+            if (tricksProgresses == null)
             {
                 return NotFound();
             }
 
-            return tricksProgress;
+            return Ok(tricksProgresses);
         }
 
-        // PUT: api/TricksProgress/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // PUT: api/TricksProgress/1
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(TricksProgress), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> PutTricksProgress(int id, TricksProgress tricksProgress)
         {
             if (id != tricksProgress.Id)
@@ -52,58 +50,44 @@ namespace RevDogsApi.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(tricksProgress).State = EntityState.Modified;
+            await _userRepo.PutTricksProgressAsync(id, tricksProgress);
+            var updatedTrick = await _userRepo.GetTricksProgressByIdAsync(id);
+            return Ok(updatedTrick);
+        }
 
-            try
+        // DELETE: api/TricksProgress/1
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(TricksProgress), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteTricksProgressAsync(int id)
+        {
+            var tricksProgresses = await _userRepo.GetTricksProgressAsync(id);
+            if (tricksProgresses == null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TricksProgressExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
-            return NoContent();
+            await _userRepo.RemoveTricksProgressAsync(id);
+
+            return Ok(tricksProgresses);
         }
 
         // POST: api/TricksProgress
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<TricksProgress>> PostTricksProgress(TricksProgress tricksProgress)
+        [ProducesResponseType(typeof(TricksProgress), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateTricksProgressAsync(TricksProgress tricksProgresses)
         {
-            _context.TricksProgress.Add(tricksProgress);
-            await _context.SaveChangesAsync();
+            var newTricksProgress = new TricksProgress
+            {
+                PetId = tricksProgresses.PetId,
+                TrickId = tricksProgresses.TrickId
+            };
+            var addedtrick = await _userRepo.PostTricksProgressAsync(newTricksProgress);
 
-            return CreatedAtAction("GetTricksProgress", new { id = tricksProgress.Id }, tricksProgress);
-        }
-
-        // // DELETE: api/TricksProgress/5
-        // [HttpDelete("{id}")]
-        // public async Task<ActionResult<TricksProgress>> DeleteTricksProgress(int id)
-        // {
-        //     var tricksProgress = await _context.TricksProgress.FindAsync(id);
-        //     if (tricksProgress == null)
-        //     {
-        //         return NotFound();
-        //     }
-
-        //     _context.TricksProgress.Remove(tricksProgress);
-        //     await _context.SaveChangesAsync();
-
-        //     return tricksProgress;
-        // }
-
-        private bool TricksProgressExists(int id)
-        {
-            return _context.TricksProgress.Any(e => e.Id == id);
+            return Ok(addedtrick);
         }
     }
 }

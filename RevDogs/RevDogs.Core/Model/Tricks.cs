@@ -12,6 +12,6 @@ namespace RevDogs.Core.Model
         public int Diffculty { get; set; }
         public int Points { get; set; }
 
-        public List<TricksProgress> TricksProgress { get; set; } = new List<TricksProgress>();
+        //public List<TricksProgress> TricksProgress { get; set; } = new List<TricksProgress>();
     }
 }

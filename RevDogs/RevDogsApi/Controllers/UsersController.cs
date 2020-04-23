@@ -1,11 +1,12 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using RevDogs.Core.Interfaces;
+using RevDogs.Core.Model;
+using RevDogs.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RevDogsApi.Models;
 
 namespace RevDogsApi.Controllers
 {
@@ -13,97 +14,108 @@ namespace RevDogsApi.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly Project2Context _context;
+        private readonly IProject2Repository _userRepo;
 
-        public UsersController(Project2Context context)
+        public UsersController(IProject2Repository userRepo)
         {
-            _context = context;
+            _userRepo = userRepo;
         }
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
+        [ProducesResponseType(typeof(IEnumerable<Users>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetUsersAsync()
         {
-            return await _context.Users.ToListAsync();
+            var users = await _userRepo.GetUsersAsync();
+            return Ok(users);
         }
 
-        // GET: api/Users/5
+        // GET: api/Users/1
         [HttpGet("{id}")]
-        public async Task<ActionResult<Users>> GetUsers(int id)
+        [ProducesResponseType(typeof(Users), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetUsers(int id)
         {
-            var users = await _context.Users.FindAsync(id);
+            var users = await _userRepo.GetUsersAsync(id);
 
             if (users == null)
             {
                 return NotFound();
             }
 
-            return users;
+            return Ok(users);
         }
 
-        // PUT: api/Users/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // GET: api/Users/Login
+        [HttpGet("login/{username}")]
+        [ProducesResponseType(typeof(Users), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Users>> GetUsersLogin(string username)
+        {
+            var users = await _userRepo.GetUserLoginAsync(username);
+
+            if (users == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(users);
+        }
+
+        // PUT: api/Users/1
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsers(int id, Users users)
+        [ProducesResponseType(typeof(Users), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PutUsers(int id, [FromBody] Users users)
         {
             if (id != users.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(users).State = EntityState.Modified;
+            await _userRepo.PutUsersAsync(id, users);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UsersExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(users);
         }
 
-        // POST: api/Users
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<Users>> PostUsers(Users users)
-        {
-            _context.Users.Add(users);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUsers", new { id = users.Id }, users);
-        }
-
-        // DELETE: api/Users/5
+        // DELETE: api/Users/1
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Users>> DeleteUsers(int id)
+        [ProducesResponseType(typeof(Users), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteUserAsync(int id)
         {
-            var users = await _context.Users.FindAsync(id);
+            var users = await _userRepo.GetUsersAsync(id);
             if (users == null)
             {
                 return NotFound();
             }
 
-            _context.Users.Remove(users);
-            await _context.SaveChangesAsync();
+            await _userRepo.RemoveUsersAsync(id);
 
-            return users;
+            return Ok(users);
         }
 
-        private bool UsersExists(int id)
+        // POST: api/Users
+        [HttpPost]
+        [ProducesResponseType(typeof(Users), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateUserAsync(Users users)
         {
-            return _context.Users.Any(e => e.Id == id);
+            var newUser = new Users
+            {
+                FirstName = users.FirstName,
+                LastName = users.LastName,
+                UserName = users.UserName
+            };
+           var addedUser = await _userRepo.PostUsersAsync(newUser);
+            return Ok(addedUser);
         }
     }
 }

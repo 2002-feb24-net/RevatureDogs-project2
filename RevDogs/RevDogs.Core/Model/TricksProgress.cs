@@ -10,7 +10,7 @@ namespace RevDogs.Core.Model
         public int? TrickId { get; set; }
         public int? Progress { get; set; }
 
-        public Dogs Pet { get; set; }
+        //public Dogs Pet { get; set; }
         public Tricks Trick { get; set; }
     }
 }

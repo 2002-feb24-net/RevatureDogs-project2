@@ -13,7 +13,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RevDogsApi.Models;
 using Microsoft.OpenApi.Models;
-
+using RevDogs.Core.Interfaces;
+using RevDogs.DataAccess.Repository;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using RevDogs.DataAccess.Model;
 
 namespace RevDogsApi
 {
@@ -29,9 +32,11 @@ namespace RevDogsApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddApplicationInsightsTelemetry();
 
-            services.AddDbContext<Project2Context>(options => options.UseSqlServer(SecretConfiguration.connectionString));
+            services.AddDbContext<RevatureDogsP2Context>(options => options.UseSqlServer(SecretConfiguration.connectionString));
+
+            services.AddScoped<IProject2Repository, Project2Repository>();
 
             services.AddCors(options =>
             {
@@ -41,6 +46,18 @@ namespace RevDogsApi
                     .AllowAnyHeader()
                 );
 
+            });
+
+            services.AddControllers(options =>
+            {
+                options.OutputFormatters.RemoveType<StringOutputFormatter>();
+                options.ReturnHttpNotAcceptable = true;
+                options.SuppressAsyncSuffixInActionNames = false;
+            });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "RevDogs", Version = "v1" });
             });
         }
 
@@ -59,6 +76,13 @@ namespace RevDogsApi
             app.UseCors("AllowLocalAndAppServiceAngular");
 
             app.UseAuthorization();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "RevDogs V1");
+            });
 
             app.UseEndpoints(endpoints =>
             {

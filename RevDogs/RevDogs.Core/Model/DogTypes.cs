@@ -11,6 +11,6 @@ namespace RevDogs.Core.Model
         public int LifeExpectancy { get; set; }
         public int? Size { get; set; }
 
-        public List<Dogs> Dogs { get; set; } = new List<Dogs>();
+        //public List<Dogs> Dogs { get; set; } = new List<Dogs>();
     }
 }

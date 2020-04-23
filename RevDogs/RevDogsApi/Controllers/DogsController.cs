@@ -1,11 +1,12 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using RevDogs.Core.Interfaces;
+using RevDogs.Core.Model;
+using RevDogs.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RevDogsApi.Models;
 
 namespace RevDogsApi.Controllers
 {
@@ -13,98 +14,91 @@ namespace RevDogsApi.Controllers
     [ApiController]
     public class DogsController : ControllerBase
     {
-        // Testing
-        private readonly Project2Context _context;
+        private readonly IProject2Repository _userRepo;
 
-        public DogsController(Project2Context context)
+        public DogsController(IProject2Repository userRepo)
         {
-            _context = context;
+            _userRepo = userRepo;
         }
 
         // GET: api/Dogs
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Dogs>>> GetDogs()
+        [ProducesResponseType(typeof(IEnumerable<Dogs>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetDogsAsync()
         {
-            return await _context.Dogs.ToListAsync();
+            var dogs = await _userRepo.GetDogsAsync();
+            return Ok(dogs);
         }
 
-        // GET: api/Dogs/5
+        // GET: api/Dogs/1
         [HttpGet("{id}")]
-        public async Task<ActionResult<Dogs>> GetDogs(int id)
+        [ProducesResponseType(typeof(Dogs), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetDogs(int id)
         {
-            var dogs = await _context.Dogs.FindAsync(id);
+            var dogs = await _userRepo.GetDogsAsync(id);
 
             if (dogs == null)
             {
                 return NotFound();
             }
 
-            return dogs;
+            return Ok(dogs);
         }
 
-        // PUT: api/Dogs/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // PUT: api/Dogs/1
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDogs(int id, Dogs dogs)
+        [ProducesResponseType(typeof(Dogs), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PutDogs(int id, [FromBody] Dogs dogs)
         {
             if (id != dogs.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(dogs).State = EntityState.Modified;
+            var updatedDog = await _userRepo.PutDogsAsync(id, dogs);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DogsExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(updatedDog);
         }
 
-        // POST: api/Dogs
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<Dogs>> PostDogs(Dogs dogs)
-        {
-            _context.Dogs.Add(dogs);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDogs", new { id = dogs.Id }, dogs);
-        }
-
-        // DELETE: api/Dogs/5
+        // DELETE: api/Dogs/1
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Dogs>> DeleteDogs(int id)
+        [ProducesResponseType(typeof(Dogs), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteDogsAsync(int id)
         {
-            var dogs = await _context.Dogs.FindAsync(id);
+            var dogs = await _userRepo.GetDogsAsync(id);
             if (dogs == null)
             {
                 return NotFound();
             }
 
-            _context.Dogs.Remove(dogs);
-            await _context.SaveChangesAsync();
+            await _userRepo.RemoveDogsAsync(id);
 
-            return dogs;
+            return Ok(dogs);
         }
 
-        private bool DogsExists(int id)
+        // POST: api/Dogs
+        [HttpPost]
+        [ProducesResponseType(typeof(Dogs), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateDogsAsync([FromBody] Dogs dogs)
         {
-            return _context.Dogs.Any(e => e.Id == id);
+            var newDogs = new Dogs
+            {
+                DogTypeId = dogs.DogTypeId,
+                UserId = dogs.UserId,
+                PetName = dogs.PetName
+            };
+            var addedDog = await _userRepo.PostDogsAsync(newDogs);
+            return Ok(addedDog);
         }
     }
 }

@@ -1,11 +1,11 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using RevDogs.Core.Interfaces;
+using RevDogs.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RevDogsApi.Models;
 
 namespace RevDogsApi.Controllers
 {
@@ -13,97 +13,22 @@ namespace RevDogsApi.Controllers
     [ApiController]
     public class TricksController : ControllerBase
     {
-        private readonly Project2Context _context;
+        private readonly IProject2Repository _userRepo;
 
-        public TricksController(Project2Context context)
+        public TricksController(IProject2Repository userRepo)
         {
-            _context = context;
+            _userRepo = userRepo;
         }
 
         // GET: api/Tricks
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tricks>>> GetTricks()
+        [ProducesResponseType(typeof(IEnumerable<Tricks>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTricksAsync()
         {
-            return await _context.Tricks.ToListAsync();
-        }
-
-        // GET: api/Tricks/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Tricks>> GetTricks(int id)
-        {
-            var tricks = await _context.Tricks.FindAsync(id);
-
-            if (tricks == null)
-            {
-                return NotFound();
-            }
-
-            return tricks;
-        }
-
-        // // PUT: api/Tricks/5
-        // // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        // [HttpPut("{id}")]
-        // public async Task<IActionResult> PutTricks(int id, Tricks tricks)
-        // {
-        //     if (id != tricks.Id)
-        //     {
-        //         return BadRequest();
-        //     }
-
-        //     _context.Entry(tricks).State = EntityState.Modified;
-
-        //     try
-        //     {
-        //         await _context.SaveChangesAsync();
-        //     }
-        //     catch (DbUpdateConcurrencyException)
-        //     {
-        //         if (!TricksExists(id))
-        //         {
-        //             return NotFound();
-        //         }
-        //         else
-        //         {
-        //             throw;
-        //         }
-        //     }
-
-        //     return NoContent();
-        // }
-
-        // // POST: api/Tricks
-        // // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        // [HttpPost]
-        // public async Task<ActionResult<Tricks>> PostTricks(Tricks tricks)
-        // {
-        //     _context.Tricks.Add(tricks);
-        //     await _context.SaveChangesAsync();
-
-        //     return CreatedAtAction("GetTricks", new { id = tricks.Id }, tricks);
-        // }
-
-        // // DELETE: api/Tricks/5
-        // [HttpDelete("{id}")]
-        // public async Task<ActionResult<Tricks>> DeleteTricks(int id)
-        // {
-        //     var tricks = await _context.Tricks.FindAsync(id);
-        //     if (tricks == null)
-        //     {
-        //         return NotFound();
-        //     }
-
-        //     _context.Tricks.Remove(tricks);
-        //     await _context.SaveChangesAsync();
-
-        //     return tricks;
-        // }
-
-        private bool TricksExists(int id)
-        {
-            return _context.Tricks.Any(e => e.Id == id);
+            var tricks = await _userRepo.GetTricksAsync();
+            return Ok(tricks);
         }
     }
 }
