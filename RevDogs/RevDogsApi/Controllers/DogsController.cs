@@ -25,7 +25,7 @@ namespace RevDogsApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Dogs>>> GetDogs()
         {
-            return await _context.Dogs.Include(d => d.DogType).ToListAsync();
+            return await _context.Dogs.ToListAsync();
         }
 
         // GET: api/Dogs/5
