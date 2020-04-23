@@ -36,7 +36,7 @@ namespace RevDogsApi
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowLocalAndAppServiceAngular", builder =>
-                builder.WithOrigins("https://revdogsangularstatic.z22.web.core.windows.net/" ,"http://localhost:4200")
+                builder.WithOrigins("https://revdogsangular.azurewebsites.net/" ,"http://localhost:4200")
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                 );
