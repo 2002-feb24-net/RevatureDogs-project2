@@ -12,7 +12,7 @@ stages:
 
   variables:
     sdkVersion: 3.1.x
-    solutionPath: NotesService
+    solutionPath: RevDogs
     buildConfiguration: Release
 
   jobs:
