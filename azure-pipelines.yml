@@ -10,10 +10,20 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- script: dotnet build
+  workingDirectory: RevDogs
+  displayName: dotnet build
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Azure-RevatureDogs-project2'
+    appType: 'webApp'
+    WebAppName: 'RevatureDogs-project2'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
