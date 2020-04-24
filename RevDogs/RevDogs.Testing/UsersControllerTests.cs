@@ -12,13 +12,15 @@ using RevDogs.Core.Model;
 using FluentAssertions;
 using RevDogs.DataAccess.Model;
 using RevDogs.DataAccess;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace RevDogs.Testing
 {
+    [TestClass]
     public class UsersControllerTests
     {
 
-
+            [TestMethod]
             public void GetUsers()
             {
             //  var mockRepository = new Mock<IProject2Repository>();
