@@ -81,8 +81,14 @@ namespace RevDogsApi.Controllers
             }
 
             var updatedDog = await _userRepo.PutDogsAsync(id, dogs);
-
-            return Ok(updatedDog);
+            if (updatedDog is null)
+            {
+                return BadRequest("The Dog with ID " + id + " exist, cannot update.");
+            }
+            else
+            {
+                return Ok(updatedDog);
+            }
         }
 
         // DELETE: api/Dogs/1
@@ -92,15 +98,15 @@ namespace RevDogsApi.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteDogsAsync(int id)
         {
-            var dogs = await _userRepo.GetDogsAsync(id);
-            if (dogs == null)
+            var result = await _userRepo.RemoveDogsAsync(id);
+            if (result)
             {
-                return NotFound();
+                return Ok("Dog with ID " + id + " successfully removed");
             }
-
-            await _userRepo.RemoveDogsAsync(id);
-
-            return Ok(dogs);
+            else
+            {
+                return BadRequest("Dog with ID " + id + " does not exist.");
+            }
         }
 
         // POST: api/Dogs
