@@ -37,7 +37,7 @@ namespace RevDogsApi.Controllers
         [ProducesResponseType(typeof(Dogs), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetDogs(int id)
+        public async Task<IActionResult> GetDogsAsync(int id)
         {
             var dogs = await _userRepo.GetDogsAsync(id);
 
@@ -48,6 +48,23 @@ namespace RevDogsApi.Controllers
 
             return Ok(dogs);
         }
+
+        //// GET: api/Dogs/1
+        //[HttpGet("{id}")]
+        //[ProducesResponseType(typeof(Dogs), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        //public async Task<IActionResult> GetUserDogsAsync(int id)
+        //{
+        //    var dogs = await _userRepo.GetDogsAsync(id);
+
+        //    if (dogs == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return Ok(dogs);
+        //}
 
         // PUT: api/Dogs/1
         [HttpPut("{id}")]
