@@ -43,7 +43,7 @@ namespace RevDogsApi.Controllers
 
             if (users == null)
             {
-                return NotFound();
+                return NotFound("User with ID: " + id + "does not exist.");
             }
 
             return Ok(users);
@@ -78,9 +78,13 @@ namespace RevDogsApi.Controllers
                 return BadRequest();
             }
 
-            await _userRepo.PutUsersAsync(id, users);
+            var user = await _userRepo.PutUsersAsync(id, users);
 
-            return Ok(users);
+            if (user is null)
+            {
+                return BadRequest("User with ID: " + id + " does not exist.");
+            }
+            return Ok("User " + user.UserName + " successfully updated");
         }
 
         // DELETE: api/Users/1
@@ -90,15 +94,13 @@ namespace RevDogsApi.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteUserAsync(int id)
         {
-            var users = await _userRepo.GetUsersAsync(id);
-            if (users == null)
+            var users = await _userRepo.RemoveUsersAsync(id);
+
+            if (!users)
             {
-                return NotFound();
+                return BadRequest("User with ID: " + id + " doesn't exist.");
             }
-
-            await _userRepo.RemoveUsersAsync(id);
-
-            return Ok(users);
+            return Ok("User with ID: " + id + "has been removed from our system.");
         }
 
         // POST: api/Users
@@ -114,8 +116,13 @@ namespace RevDogsApi.Controllers
                 LastName = users.LastName,
                 UserName = users.UserName
             };
-           var addedUser = await _userRepo.PostUsersAsync(newUser);
-            return Ok(addedUser);
+            var addedUser = await _userRepo.PostUsersAsync(newUser);
+
+            if (addedUser is null)
+            {
+                return BadRequest("An account with that username: " + users.UserName+ " already exist, please create a different one");
+            }
+            return Ok(users.UserName + ", Welcome to Revature Dogs!");
         }
     }
 }

@@ -43,7 +43,7 @@ namespace RevDogsApi.Controllers
 
             if (dogs == null)
             {
-                return NotFound();
+                return BadRequest("No dogs with ID: " + id + " in our system.");
             }
 
             return Ok(dogs);

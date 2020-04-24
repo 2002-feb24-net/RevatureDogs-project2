@@ -54,6 +54,11 @@ namespace RevDogs.DataAccess.Repository
                                     .Include(d => d.Dogs)
                                     .FirstOrDefaultAsync(u => u.Id == id);
 
+            if (users is null)
+            {
+                return null;
+            }
+
             return Mapper.MapUsers(users);
         }
 
@@ -81,7 +86,7 @@ namespace RevDogs.DataAccess.Repository
 
             if (user is null)
             {
-                _logger.LogError("User does with ID {userId} does not exist", user.Id);
+                _logger.LogError("User with ID {userId} does not exist", user.Id);
                 return null;
             }
             else
@@ -204,6 +209,11 @@ namespace RevDogs.DataAccess.Repository
                                 .Include(t => t.TricksProgress)
                                 .ThenInclude(t => t.Trick)
                                 .FirstOrDefaultAsync(d => d.Id == id);
+
+            if (dog is null)
+            {
+                return null;
+            }
 
             return Mapper.MapDogs(dog);
         }
@@ -344,6 +354,11 @@ namespace RevDogs.DataAccess.Repository
                                                                 .Where(u => u.PetId == id)
                                                                 .ToListAsync();
 
+            if (tricksProgresses.Count() == 0)
+            {
+                return null;
+            }
+
             return tricksProgresses.Select(Mapper.MapTricksProgress);
         }
 
@@ -358,6 +373,11 @@ namespace RevDogs.DataAccess.Repository
             var tricksProgress = await _dbContext.TricksProgress
                                                     .Include(t => t.Trick)
                                                     .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (tricksProgress is null)
+            {
+                return null;
+            }
 
             return Mapper.MapTricksProgress(tricksProgress);
         }

@@ -30,9 +30,9 @@ namespace RevDogsApi.Controllers
         {
             var tricksProgresses = await _userRepo.GetTricksProgressAsync(id);
 
-            if (tricksProgresses == null)
+            if (tricksProgresses is null)
             {
-                return NotFound();
+                return NotFound("TricksProgress with ID: " + id + " does not exist.");
             }
 
             return Ok(tricksProgresses);
