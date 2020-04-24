@@ -77,17 +77,27 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>Returns the user after updated</returns>
         public async Task<Core.Model.Users> PutUsersAsync(int id, Core.Model.Users users)
         {
-            _logger.LogInformation("Updating user with ID {users.Id}.", users.Id);
-
-            // This method only marks the properties changed
-            // as modified. 
             var user = await _dbContext.Users.FindAsync(id);
-            var newUser = Mapper.MapUsers(users);
 
-            _dbContext.Entry(user).CurrentValues.SetValues(newUser);
+            if (user is null)
+            {
+                _logger.LogError("User does with ID {userId} does not exist", user.Id);
+                return null;
+            }
+            else
+            {
+                _logger.LogInformation("Updating user with ID {usersId}.", users.Id);
 
-            await _dbContext.SaveChangesAsync();
-            return Mapper.MapUsers(newUser);
+                // This method only marks the properties changed
+                // as modified. 
+
+                var newUser = Mapper.MapUsers(users);
+
+                _dbContext.Entry(user).CurrentValues.SetValues(newUser);
+
+                await _dbContext.SaveChangesAsync();
+                return Mapper.MapUsers(newUser);
+            }
         }
 
         /// <summary>
@@ -97,23 +107,36 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>The user that was added</returns>
         public async Task<Core.Model.Users> PostUsersAsync(Core.Model.Users users)
         {
-            var newUser = new Users
+            var exists = await _dbContext.Users
+                                .FirstOrDefaultAsync(u => u.UserName == users.UserName);
+            
+            // if username already exist in DB
+            // return null.
+            if (exists is null)
             {
-                FirstName = users.FirstName,
-                LastName = users.LastName,
-                UserName = users.UserName
-            };
+                var newUser = new Users
+                {
+                    FirstName = users.FirstName,
+                    LastName = users.LastName,
+                    UserName = users.UserName
+                };
 
-            _logger.LogInformation("Adding a new User.");
+                _logger.LogInformation("Adding a new User.");
 
-            _dbContext.Add(newUser);
-            await _dbContext.SaveChangesAsync();
+                _dbContext.Add(newUser);
+                await _dbContext.SaveChangesAsync();
 
-            // After the Entity is added, return the Entity
-            // by getting the max id (newest Entity).
-            int id = await _dbContext.Users.MaxAsync(u => u.Id);
-            var addedUser = _dbContext.Users.Find(id);
-            return Mapper.MapUsers(addedUser);
+                // After the Entity is added, return the Entity
+                // by getting the max id (newest Entity).
+                int id = await _dbContext.Users.MaxAsync(u => u.Id);
+                var addedUser = _dbContext.Users.Find(id);
+                return Mapper.MapUsers(addedUser);
+            }
+            else
+            {
+                _logger.LogWarning("User name {username} already exist.", exists.UserName);
+                return null;
+            }
         }
 
         /// <summary>
@@ -123,28 +146,36 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>a Bool based on success/failure</returns>
         public async Task<bool> RemoveUsersAsync(int id)
         {
-            _logger.LogInformation("Removing User based on {User.Id}, Also removeing " +
-                                        "Dogs and TricksProgress", id);
             var user = await _dbContext.Users
                             .Include(d => d.Dogs)
                             .FirstOrDefaultAsync(u => u.Id == id);
 
-            // Loop through all the dogs, and then TricksProgress
-            // and remove each record.
-            foreach (var d in user.Dogs)
+            if (user is null)
             {
-                foreach (var t in d.TricksProgress)
+                _logger.LogError("The User with ID {userId} does not exist.", id);
+                return false;
+            }
+            else
+            {
+                _logger.LogInformation("Removing User based on {User.Id}, Also removeing " +
+                                            "Dogs and TricksProgress", id);
+                // Loop through all the dogs, and then TricksProgress
+                // and remove each record.
+                foreach (var d in user.Dogs)
                 {
-                    _dbContext.Remove(t);
+                    foreach (var t in d.TricksProgress)
+                    {
+                        _dbContext.Remove(t);
+                    }
+
+                    _dbContext.Remove(d);
                 }
 
-                _dbContext.Remove(d);
+                _dbContext.Remove(user);
+                await _dbContext.SaveChangesAsync();
+
+                return true;
             }
-
-            _dbContext.Remove(user);
-            int removed = await _dbContext.SaveChangesAsync();
-
-            return removed > 0;
         }
 
         /// <summary>
@@ -203,18 +234,27 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>The Updated Dog</returns>
         public async Task<Core.Model.Dogs> PutDogsAsync(int id, Core.Model.Dogs dogs)
         {
-            _logger.LogInformation("Updating the Dog with ID {Dogs.Id}.", dogs.Id);
-
-            // This method only marks the properties changed
-            // as modified. 
             var oldDog = await _dbContext.Dogs.FindAsync(id);
-            var newDog = Mapper.MapDogs(dogs);
 
-            _dbContext.Entry(oldDog).CurrentValues.SetValues(newDog);
+            if (oldDog is null)
+            {
+                _logger.LogError("The Dog with ID {dogsId} does not exist", dogs.Id);
+                return null;
+            }
+            else
+            {
+                _logger.LogInformation("Updating the Dog with ID {dogsId}.", dogs.Id);
 
-            await _dbContext.SaveChangesAsync();
+                // This method only marks the properties changed
+                // as modified.
+                var newDog = Mapper.MapDogs(dogs);
 
-            return Mapper.MapDogs(newDog);
+                _dbContext.Entry(oldDog).CurrentValues.SetValues(newDog);
+
+                await _dbContext.SaveChangesAsync();
+
+                return Mapper.MapDogs(newDog);
+            }
         }
 
         /// <summary>
@@ -251,22 +291,30 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>a Bool based on success/failure</returns>
         public async Task<bool> RemoveDogsAsync(int id)
         {
-            _logger.LogInformation("Removing a dog based on {Dog.Id}, " +
-                                    "and all the tricks related to Dog", id);
-
             var dog = await _dbContext.Dogs.FirstOrDefaultAsync(d => d.Id == id);
 
-            // Loop through all the TricksProgress
-            // and remove each record.
-            foreach (var trick in dog.TricksProgress)
+            if (dog is null)
             {
-                _dbContext.TricksProgress.Remove(trick);
+                _logger.LogError("The Dog you with ID {dogsId} doesn't exist.", id);
+                return false;
             }
+            else
+            {
+                _logger.LogInformation("Removing a dog based on {Dog.Id}, " +
+                                    "and all the tricks related to Dog", id);
 
-            _dbContext.Dogs.Remove(dog);
-            int removed = await _dbContext.SaveChangesAsync();
+                // Loop through all the TricksProgress
+                // and remove each record.
+                foreach (var trick in dog.TricksProgress)
+                {
+                    _dbContext.TricksProgress.Remove(trick);
+                }
 
-            return removed > 0;
+                _dbContext.Dogs.Remove(dog);
+                await _dbContext.SaveChangesAsync();
+
+                return true;
+            }
         }
 
         /// <summary>
@@ -323,18 +371,28 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>The updated TricksProgress</returns>
         public async Task<Core.Model.TricksProgress> PutTricksProgressAsync(int id, Core.Model.TricksProgress tricksProgress)
         {
-            _logger.LogInformation("Updating a TricksProgress with ID {tricksProgress.Id}", tricksProgress.Id);
-
-            // This method only marks the properties changed
-            // as modified
             var oldTricks = await _dbContext.TricksProgress
                                                     .FirstOrDefaultAsync(t => t.Id == tricksProgress.Id);
-            var newTricks = Mapper.MapTricksProgress(tricksProgress);
 
-            _dbContext.Entry(oldTricks).CurrentValues.SetValues(newTricks);
-            await _dbContext.SaveChangesAsync();
+            if (oldTricks is null)
+            {
+                _logger.LogError("The TricksProgress with ID {tricksProgressId} does not exist.", tricksProgress.Id);
+                return null;
+            }
+            else
+            {
+                _logger.LogInformation("Updating a TricksProgress with ID {tricksProgressId}", tricksProgress.Id);
 
-            return Mapper.MapTricksProgress(newTricks);
+                // This method only marks the properties changed
+                // as modified
+                var newTricks = Mapper.MapTricksProgress(tricksProgress);
+
+                _dbContext.Entry(oldTricks).CurrentValues.SetValues(newTricks);
+                await _dbContext.SaveChangesAsync();
+
+                return Mapper.MapTricksProgress(newTricks);
+
+            }
         }
 
         /// <summary>
@@ -345,24 +403,35 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>The added TricksProgress</returns>
         public async Task<Core.Model.TricksProgress> PostTricksProgressAsync(Core.Model.TricksProgress tricksProgress)
         {
-            var newTricks = new TricksProgress
+            var exists = await _dbContext.TricksProgress
+                                    .FirstOrDefaultAsync(t => t.PetId == tricksProgress.PetId && t.TrickId == tricksProgress.TrickId);
+
+            if (exists is null)
             {
-                PetId = tricksProgress.PetId,
-                TrickId = tricksProgress.TrickId,
-            };
+                var newTricks = new TricksProgress
+                {
+                    PetId = tricksProgress.PetId,
+                    TrickId = tricksProgress.TrickId,
+                };
 
-            _logger.LogInformation("Adding a new TricksProgress.");
+                _logger.LogInformation("Adding a new TricksProgress.");
 
-            _dbContext.Add(newTricks);
-            await _dbContext.SaveChangesAsync();
+                _dbContext.Add(newTricks);
+                await _dbContext.SaveChangesAsync();
 
-            // After the Entity is added, return
-            // the Entity by getting the max id (Newest Entity)
-            int id = await _dbContext.TricksProgress.MaxAsync(i => i.Id);
-            var nt = await _dbContext.TricksProgress
-                                    .Include(t => t.Trick)
-                                    .FirstOrDefaultAsync(t => t.Id == id);
-            return Mapper.MapTricksProgress(nt);
+                // After the Entity is added, return
+                // the Entity by getting the max id (Newest Entity)
+                int id = await _dbContext.TricksProgress.MaxAsync(i => i.Id);
+                var nt = await _dbContext.TricksProgress
+                                        .Include(t => t.Trick)
+                                        .FirstOrDefaultAsync(t => t.Id == id);
+                return Mapper.MapTricksProgress(nt);
+            }
+            else
+            {
+                _logger.LogInformation("Dog with this ID {tricksProgressId} already knows this Trick.", tricksProgress.PetId);
+                return null;
+            }
         }
 
         /// <summary>
@@ -373,16 +442,24 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>A bool based on success/failure</returns>
         public async Task<bool> RemoveTricksProgressAsync(int id)
         {
-            _logger.LogInformation("Removing a TricksProgress based on " +
-                                        "{TricksProgress.Id}", id);
-
             var tricksProgress = await _dbContext
                         .TricksProgress.FirstOrDefaultAsync(t => t.Id == id);
 
-            _dbContext.Remove(tricksProgress);
-            int removed = await _dbContext.SaveChangesAsync();
+            if (tricksProgress is null)
+            {
+                _logger.LogError("TricksProgress with ID {tricksProgressId} does not exist.", id);
+                return false;
+            }
+            else
+            {
+                _logger.LogInformation("Removing a TricksProgress based on " +
+                                            "{TricksProgress.Id}", id);
 
-            return removed > 0;
+                _dbContext.Remove(tricksProgress);
+                await _dbContext.SaveChangesAsync();
+
+                return true;
+            }
         }
 
         /// <summary>
