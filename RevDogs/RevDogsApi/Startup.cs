@@ -34,7 +34,7 @@ namespace RevDogsApi
         {
             services.AddApplicationInsightsTelemetry();
 
-            services.AddDbContext<RevatureDogsP2Context>(options => options.UseSqlServer(SecretConfiguration.connectionString));
+            services.AddDbContext<RevatureDogsP2Context>(options => options.UseSqlServer(Configuration.GetConnectionString("RevatureDogsP2Context")));
 
             services.AddScoped<IProject2Repository, Project2Repository>();
 

@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.1.1" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
@@ -17,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\RevDogs.Core\RevDogs.Core.csproj" />
     <ProjectReference Include="..\RevDogs.DataAccess\RevDogs.DataAccess.csproj" />
+    <ProjectReference Include="..\RevDogsApi\RevDogsApi.csproj" />
   </ItemGroup>
 
 </Project>
