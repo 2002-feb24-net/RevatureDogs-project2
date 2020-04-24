@@ -45,14 +45,20 @@ namespace RevDogsApi.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> PutTricksProgress(int id, TricksProgress tricksProgress)
         {
-            if (id != tricksProgress.Id)
+            var exists = await _userRepo.PutTricksProgressAsync(id, tricksProgress);
+            if (exists is null)
             {
-                return BadRequest();
+                return BadRequest("TricksProgress with ID " + id + " does not exist.");
             }
+            else
+            {
+                if (id != tricksProgress.Id)
+                {
+                    return BadRequest();
+                }
 
-            await _userRepo.PutTricksProgressAsync(id, tricksProgress);
-            var updatedTrick = await _userRepo.GetTricksProgressByIdAsync(id);
-            return Ok(updatedTrick);
+                return Ok("Your pups Trick has been updated!");
+            }
         }
 
         // DELETE: api/TricksProgress/1
@@ -62,15 +68,14 @@ namespace RevDogsApi.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteTricksProgressAsync(int id)
         {
-            var tricksProgresses = await _userRepo.GetTricksProgressAsync(id);
-            if (tricksProgresses == null)
+            var results = await _userRepo.RemoveTricksProgressAsync(id);
+            if (!results)
             {
-                return NotFound();
+                return BadRequest("TricksProgress with this ID " + id + " does not exist");
             }
 
-            await _userRepo.RemoveTricksProgressAsync(id);
 
-            return Ok(tricksProgresses);
+            return Ok("TricksProgress successfully removed.");
         }
 
         // POST: api/TricksProgress
@@ -87,7 +92,14 @@ namespace RevDogsApi.Controllers
             };
             var addedtrick = await _userRepo.PostTricksProgressAsync(newTricksProgress);
 
-            return Ok(addedtrick);
+            if (addedtrick is null)
+            {
+                return BadRequest("Your pup already knows this trick!");
+            }
+            else
+            {
+                return Ok("Your pup learned a new trick!");
+            }
         }
     }
 }
