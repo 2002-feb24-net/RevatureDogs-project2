@@ -37,7 +37,7 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>A list of Users</returns>
         public async Task<IEnumerable<Core.Model.Users>> GetUsersAsync()
         {
-            List<Users> listUsers = await _dbContext.Users
+            var listUsers = await _dbContext.Users
                                         .Include(d => d.Dogs)
                                         .ToListAsync();
             return listUsers.Select(Mapper.MapUsers);
@@ -50,7 +50,7 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>A single user with id</returns>
         public async Task<Core.Model.Users> GetUsersAsync(int id)
         {
-            Model.Users users = await _dbContext.Users
+            var users = await _dbContext.Users
                                     .Include(d => d.Dogs)
                                     .FirstOrDefaultAsync(u => u.Id == id);
 
@@ -79,7 +79,7 @@ namespace RevDogs.DataAccess.Repository
         {
             _logger.LogInformation("Updating user with ID {users.Id}.", users.Id);
 
-            // This method only makrs the properties changed
+            // This method only marks the properties changed
             // as modified. 
             var user = await _dbContext.Users.FindAsync(id);
             var newUser = Mapper.MapUsers(users);
@@ -97,7 +97,7 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>The user that was added</returns>
         public async Task<Core.Model.Users> PostUsersAsync(Core.Model.Users users)
         {
-            var newUser = new Model.Users
+            var newUser = new Users
             {
                 FirstName = users.FirstName,
                 LastName = users.LastName,
@@ -109,8 +109,8 @@ namespace RevDogs.DataAccess.Repository
             _dbContext.Add(newUser);
             await _dbContext.SaveChangesAsync();
 
-            // After the user is added, return the user
-            // by getting the max id (newest user).
+            // After the Entity is added, return the Entity
+            // by getting the max id (newest Entity).
             int id = await _dbContext.Users.MaxAsync(u => u.Id);
             var addedUser = _dbContext.Users.Find(id);
             return Mapper.MapUsers(addedUser);
@@ -120,12 +120,12 @@ namespace RevDogs.DataAccess.Repository
         /// Removes User from DB based on ID
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>True of False based on success</returns>
+        /// <returns>a Bool based on success/failure</returns>
         public async Task<bool> RemoveUsersAsync(int id)
         {
             _logger.LogInformation("Removing User based on {User.Id}, Also removeing " +
                                         "Dogs and TricksProgress", id);
-            Model.Users user = await _dbContext.Users
+            var user = await _dbContext.Users
                             .Include(d => d.Dogs)
                             .FirstOrDefaultAsync(u => u.Id == id);
 
@@ -153,7 +153,7 @@ namespace RevDogs.DataAccess.Repository
         /// <returns>A list of all Dogs with tricks</returns>
         public async Task<IEnumerable<Core.Model.Dogs>> GetDogsAsync()
         {
-            List<Model.Dogs> dogs = await _dbContext.Dogs
+            var dogs = await _dbContext.Dogs
                                         .Include(t => t.TricksProgress)
                                         .ThenInclude(t => t.Trick).ToListAsync();
 
@@ -179,17 +179,17 @@ namespace RevDogs.DataAccess.Repository
 
         /// <summary>
         /// Getting dogs, Users, TricksProgress, and Tricks
-        /// based on a Users ID
+        /// based on a Users ID (not used yet)
         /// </summary>
         /// <param name="Userid"></param>
         /// <returns></returns>
         public async Task<IEnumerable<Core.Model.Dogs>> GetUserDogsAsync(int Userid)
         {
-            List<Model.Dogs> dogs = await _dbContext.Dogs
-                                        .Include(u => u.User)
-                                        .Include(t => t.TricksProgress)
-                                        .Include(p => p.DogType)
-                                        .Where(d => d.UserId == Userid).ToListAsync();
+            var dogs = await _dbContext.Dogs
+                                .Include(u => u.User)
+                                .Include(t => t.TricksProgress)
+                                .Include(p => p.DogType)
+                                .Where(d => d.UserId == Userid).ToListAsync();
 
             return dogs.Select(Mapper.MapDogs);
         }
@@ -205,7 +205,7 @@ namespace RevDogs.DataAccess.Repository
         {
             _logger.LogInformation("Updating the Dog with ID {Dogs.Id}.", dogs.Id);
 
-            // This method only makrs the properties changed
+            // This method only marks the properties changed
             // as modified. 
             var oldDog = await _dbContext.Dogs.FindAsync(id);
             var newDog = Mapper.MapDogs(dogs);
@@ -217,27 +217,47 @@ namespace RevDogs.DataAccess.Repository
             return Mapper.MapDogs(newDog);
         }
 
-
+        /// <summary>
+        /// Adding a dog to the DB
+        /// </summary>
+        /// <param name="dogs"></param>
+        /// <returns>The Dog added</returns>
         public async Task<Core.Model.Dogs> PostDogsAsync(Core.Model.Dogs dogs)
         {
-            var newDog = new Model.Dogs
+            var newDog = new Dogs
             {
                 UserId = dogs.UserId,
                 DogTypeId = dogs.DogTypeId,
                 PetName = dogs.PetName
             };
 
+            _logger.LogInformation("Addng an Dog to the DB");
+
             _dbContext.Add(newDog);
             await _dbContext.SaveChangesAsync();
+
+            // After the Entity is added, return the Entity
+            // by getting the max id (newest Entity).
             int id = await _dbContext.Dogs.MaxAsync(d => d.Id);
             var nd = await _dbContext.Dogs.FindAsync(id);
             return Mapper.MapDogs(nd);
         }
 
+        /// <summary>
+        /// Removing Dog based on ID
+        /// from the DB
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>a Bool based on success/failure</returns>
         public async Task<bool> RemoveDogsAsync(int id)
         {
-            Model.Dogs dog = await _dbContext.Dogs.FirstOrDefaultAsync(d => d.Id == id);
+            _logger.LogInformation("Removing a dog based on {Dog.Id}, " +
+                                    "and all the tricks related to Dog", id);
 
+            var dog = await _dbContext.Dogs.FirstOrDefaultAsync(d => d.Id == id);
+
+            // Loop through all the TricksProgress
+            // and remove each record.
             foreach (var trick in dog.TricksProgress)
             {
                 _dbContext.TricksProgress.Remove(trick);
@@ -249,21 +269,29 @@ namespace RevDogs.DataAccess.Repository
             return removed > 0;
         }
 
+        /// <summary>
+        /// Retreiving all dog types
+        /// from the DB
+        /// </summary>
+        /// <returns>a List of Dog Types</returns>
         public async Task<IEnumerable<Core.Model.DogTypes>> GetDogTypesAsync()
         {
-            List<Model.DogTypes> dogTypes = await _dbContext.DogTypes
-                                                    .Include(d => d.Dogs)
-                                                    .ToListAsync();
+            var dogTypes = await _dbContext.DogTypes
+                                    .Include(d => d.Dogs)
+                                    .ToListAsync();
 
             return dogTypes.Select(Mapper.MapDogTypes);
         }
 
         /// <summary>
-        /// Trick methods
+        /// Gets a all TricksProgress based on
+        /// Dogs Id and includes Tricks
         /// </summary>
+        /// <param name="id"></param>
+        /// <returns>List of a dogs Tricks</returns>
         public async Task<IEnumerable<Core.Model.TricksProgress>> GetTricksProgressAsync(int id)
         {
-            List<Model.TricksProgress> tricksProgresses = await _dbContext.TricksProgress
+            var tricksProgresses = await _dbContext.TricksProgress
                                                                 .Include(t => t.Trick)
                                                                 .Where(u => u.PetId == id)
                                                                 .ToListAsync();
@@ -271,6 +299,12 @@ namespace RevDogs.DataAccess.Repository
             return tricksProgresses.Select(Mapper.MapTricksProgress);
         }
 
+        /// <summary>
+        /// Returns a single Trick Progress
+        /// based on ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>A single Trick Progress</returns>
         public async Task<Core.Model.TricksProgress> GetTricksProgressByIdAsync(int id)
         {
             var tricksProgress = await _dbContext.TricksProgress
@@ -280,31 +314,50 @@ namespace RevDogs.DataAccess.Repository
             return Mapper.MapTricksProgress(tricksProgress);
         }
 
+        /// <summary>
+        /// Updates a dogs Trick Progress based
+        /// on Dogs ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="tricksProgress"></param>
+        /// <returns>The updated TricksProgress</returns>
         public async Task<Core.Model.TricksProgress> PutTricksProgressAsync(int id, Core.Model.TricksProgress tricksProgress)
         {
-            Model.TricksProgress oldTricks = await _dbContext.TricksProgress
+            _logger.LogInformation("Updating a TricksProgress with ID {tricksProgress.Id}", tricksProgress.Id);
+
+            // This method only marks the properties changed
+            // as modified
+            var oldTricks = await _dbContext.TricksProgress
                                                     .FirstOrDefaultAsync(t => t.Id == tricksProgress.Id);
+            var newTricks = Mapper.MapTricksProgress(tricksProgress);
 
-            oldTricks.PetId = tricksProgress.PetId;
-            oldTricks.TrickId = tricksProgress.TrickId;
-            oldTricks.Progress = tricksProgress.Progress;
-
-            _dbContext.Update(oldTricks);
+            _dbContext.Entry(oldTricks).CurrentValues.SetValues(newTricks);
             await _dbContext.SaveChangesAsync();
 
-            return Mapper.MapTricksProgress(oldTricks);
+            return Mapper.MapTricksProgress(newTricks);
         }
 
+        /// <summary>
+        /// Adding a new TricksProgress
+        /// to the DB
+        /// </summary>
+        /// <param name="tricksProgress"></param>
+        /// <returns>The added TricksProgress</returns>
         public async Task<Core.Model.TricksProgress> PostTricksProgressAsync(Core.Model.TricksProgress tricksProgress)
         {
-            var newTricks = new Model.TricksProgress
+            var newTricks = new TricksProgress
             {
                 PetId = tricksProgress.PetId,
                 TrickId = tricksProgress.TrickId,
             };
 
+            _logger.LogInformation("Adding a new TricksProgress.");
+
             _dbContext.Add(newTricks);
             await _dbContext.SaveChangesAsync();
+
+            // After the Entity is added, return
+            // the Entity by getting the max id (Newest Entity)
             int id = await _dbContext.TricksProgress.MaxAsync(i => i.Id);
             var nt = await _dbContext.TricksProgress
                                     .Include(t => t.Trick)
@@ -312,10 +365,19 @@ namespace RevDogs.DataAccess.Repository
             return Mapper.MapTricksProgress(nt);
         }
 
+        /// <summary>
+        /// Removing TricksProgress from DB
+        /// based on ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>A bool based on success/failure</returns>
         public async Task<bool> RemoveTricksProgressAsync(int id)
         {
-            Model.TricksProgress tricksProgress = await _dbContext
-                                                    .TricksProgress.FirstOrDefaultAsync(t => t.Id == id);
+            _logger.LogInformation("Removing a TricksProgress based on " +
+                                        "{TricksProgress.Id}", id);
+
+            var tricksProgress = await _dbContext
+                        .TricksProgress.FirstOrDefaultAsync(t => t.Id == id);
 
             _dbContext.Remove(tricksProgress);
             int removed = await _dbContext.SaveChangesAsync();
@@ -323,9 +385,14 @@ namespace RevDogs.DataAccess.Repository
             return removed > 0;
         }
 
+        /// <summary>
+        /// Get a list of all Tricks
+        /// from the DB
+        /// </summary>
+        /// <returns>Lists of Tricks</returns>
         public async Task<IEnumerable<Core.Model.Tricks>> GetTricksAsync()
         {
-            List<Model.Tricks> tricks = await _dbContext.Tricks
+            var tricks = await _dbContext.Tricks
                                             .Include(t => t.TricksProgress)
                                             .ToListAsync();
 
