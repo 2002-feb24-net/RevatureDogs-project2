@@ -49,6 +49,7 @@ namespace RevDogsApi.Controllers
             return Ok(dogs);
         }
 
+#region GetUserDogs
         //// GET: api/Dogs/1
         //[HttpGet("{id}")]
         //[ProducesResponseType(typeof(Dogs), StatusCodes.Status200OK)]
@@ -65,6 +66,7 @@ namespace RevDogsApi.Controllers
 
         //    return Ok(dogs);
         //}
+#endregion
 
         // PUT: api/Dogs/1
         [HttpPut("{id}")]
